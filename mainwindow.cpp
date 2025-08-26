@@ -6,6 +6,22 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    instrumentModel = new QStandardItemModel(this);
+    orderBookModel = new QStandardItemModel(this);
+
+    ui->instrumentTableView->setModel(instrumentModel);
+    ui->orderBookTableView->setModel(orderBookModel);
+
+    networkManager = new QNetworkAccessManager(this);
+    refreshTimer = new QTimer(this);
+    connect(refreshTimer, &QTimer::timeout, this, &MainWindow::fetchInstruments);
+    refreshTimer->start(5000); // every 5 seconds
+
+    connect(ui->instrumentTableView, &QTableView::clicked, this, [=](const QModelIndex &index) {
+        QString instrumentId = instrumentModel->item(index.row(), 0)->text();
+        fetchOrderBook(instrumentId);
+    });
 }
 
 void MainWindow::fetchInstruments() {
@@ -40,6 +56,7 @@ void MainWindow::fetchOrderBook(const QString &instrumentId) {
     QString url = QString("https://www.okx.com/api/v5/market/books?instId=%1&sz=50").arg(instrumentId);
     QUrl qurl(url);
     QNetworkRequest request(qurl);
+
     QNetworkReply *reply = networkManager->get(request);
     connect(reply, &QNetworkReply::finished, this, [=]() {
         QByteArray response = reply->readAll();
@@ -83,18 +100,6 @@ void MainWindow::fetchOrderBook(const QString &instrumentId) {
 
 MainWindow::~MainWindow()
 {
-    instrumentModel = new QStandardItemModel(this);
-    orderBookModel = new QStandardItemModel(this);
-
-    ui->instrumentTableView->setModel(instrumentModel);
-    ui->orderBookTableView->setModel(orderBookModel);
-
-    networkManager = new QNetworkAccessManager(this);
-    refreshTimer = new QTimer(this);
-    connect(refreshTimer, &QTimer::timeout, this, &MainWindow::fetchInstruments);
-    refreshTimer->start(5000); // every 5 seconds
-
-
     delete ui;
 }
 
