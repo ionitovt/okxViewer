@@ -36,6 +36,50 @@ void MainWindow::fetchInstruments() {
     });
 }
 
+void MainWindow::fetchOrderBook(const QString &instrumentId) {
+    QString url = QString("https://www.okx.com/api/v5/market/books?instId=%1&sz=50").arg(instrumentId);
+    QUrl qurl(url);
+    QNetworkRequest request(qurl);
+    QNetworkReply *reply = networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [=]() {
+        QByteArray response = reply->readAll();
+        reply->deleteLater();
+        QJsonDocument doc = QJsonDocument::fromJson(response);
+        QJsonObject obj = doc.object()["data"].toArray()[0].toObject();
+
+        QJsonArray bids = obj["bids"].toArray();
+        QJsonArray asks = obj["asks"].toArray();
+
+        orderBookModel->clear();
+        orderBookModel->setHorizontalHeaderLabels({"BID Qty", "BID Price", "ASK Price", "ASK Qty"});
+
+        int count = std::max(bids.size(), asks.size());
+        for (int i = 0; i < count; ++i) {
+            QList<QStandardItem *> row;
+            if (i < bids.size()) {
+                QJsonArray bid = bids[i].toArray();
+                row << new QStandardItem(bid[1].toString());
+                row << new QStandardItem(bid[0].toString());
+            } else {
+                row << new QStandardItem("");
+                row << new QStandardItem("");
+            }
+
+            if (i < asks.size()) {
+                QJsonArray ask = asks[i].toArray();
+                row << new QStandardItem(ask[0].toString());
+                row << new QStandardItem(ask[1].toString());
+            } else {
+                row << new QStandardItem("");
+                row << new QStandardItem("");
+            }
+
+            orderBookModel->appendRow(row);
+        }
+    });
+}
+
+
 
 MainWindow::~MainWindow()
 {

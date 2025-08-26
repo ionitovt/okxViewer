@@ -11,6 +11,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QNetworkRequest>
+#include <QUrl>
 
 
 
@@ -30,6 +31,7 @@ public:
 
 private slots:
     void fetchInstruments();
+    void fetchOrderBook(const QString &instrumentId);
 
 private:
     Ui::MainWindow *ui;
