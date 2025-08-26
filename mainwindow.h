@@ -2,6 +2,17 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStandardItemModel>
+#include <QNetworkAccessManager>
+#include <QTimer>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <QNetworkRequest>
+
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,7 +28,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void fetchInstruments();
+
 private:
     Ui::MainWindow *ui;
+    QStandardItemModel *instrumentModel;
+    QStandardItemModel *orderBookModel;
+    QNetworkAccessManager *networkManager;
+    QTimer *refreshTimer;
 };
 #endif // MAINWINDOW_H
