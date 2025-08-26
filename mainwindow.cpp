@@ -20,11 +20,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(ui->instrumentTableView, &QTableView::clicked, this, [=](const QModelIndex &index) {
         QString instrumentId = instrumentModel->item(index.row(), 0)->text();
+        qDebug() << "Clicked on:" << instrumentId;
         fetchOrderBook(instrumentId);
     });
 }
 
 void MainWindow::fetchInstruments() {
+    qDebug() << "[fetchInstruments] sending request...";
+
     QNetworkRequest request(QUrl("https://www.okx.com/api/v5/market/tickers?instType=FUTURES"));
     QNetworkReply *reply = networkManager->get(request);
     connect(reply, &QNetworkReply::finished, this, [=]() {
@@ -32,6 +35,7 @@ void MainWindow::fetchInstruments() {
         reply->deleteLater();
         QJsonDocument doc = QJsonDocument::fromJson(response);
         QJsonArray arr = doc.object()["data"].toArray();
+        qDebug() << "[fetchInstruments] response:" << response;
 
         instrumentModel->clear();
         instrumentModel->setHorizontalHeaderLabels({"Instrument", "Best BID", "Best BID Qty", "Market Price", "Best ASK", "Best ASK Qty"});
@@ -48,6 +52,8 @@ void MainWindow::fetchInstruments() {
             row << new QStandardItem(obj["askPx"].toString());
             row << new QStandardItem(obj["askSz"].toString());
             instrumentModel->appendRow(row);
+            qDebug() << "[fetchInstruments] parsed rows:" << arr.size();
+
         }
     });
 }
