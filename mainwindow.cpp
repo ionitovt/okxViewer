@@ -38,7 +38,7 @@ void MainWindow::fetchInstruments() {
         qDebug() << "[fetchInstruments] response:" << response;
 
         instrumentModel->clear();
-        instrumentModel->setHorizontalHeaderLabels({"Instrument", "Best BID", "Best BID Qty", "Market Price", "Best ASK", "Best ASK Qty"});
+        instrumentModel->setHorizontalHeaderLabels({"Instrument", "Best BID Qty", "Best BID", "Market Price", "Best ASK", "Best ASK Qty"});
 
         for (const QJsonValue &val : arr) {
             QJsonObject obj = val.toObject();
@@ -46,8 +46,8 @@ void MainWindow::fetchInstruments() {
 
             QList<QStandardItem *> row;
             row << new QStandardItem(obj["instId"].toString());
-            row << new QStandardItem(obj["bidPx"].toString());
             row << new QStandardItem(obj["bidSz"].toString());
+            row << new QStandardItem(obj["bidPx"].toString());
             row << new QStandardItem(obj["last"].toString());
             row << new QStandardItem(obj["askPx"].toString());
             row << new QStandardItem(obj["askSz"].toString());
@@ -76,7 +76,7 @@ void MainWindow::fetchOrderBook(const QString &instrumentId) {
         int levelCount = std::min(bids.size(), asks.size());
 
         orderBookModel->clear();
-        orderBookModel->setHorizontalHeaderLabels({"BID Qty", "BID Price", "ASK Price", "ASK Qty"});
+        orderBookModel->setHorizontalHeaderLabels({"BID Quantity", "BID Price", "ASK Price", "ASK Quantity"});
 
         for (int i = 0; i < levelCount; ++i) {
             QJsonArray bid = bids[i].toArray();
