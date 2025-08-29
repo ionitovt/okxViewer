@@ -73,32 +73,24 @@ void MainWindow::fetchOrderBook(const QString &instrumentId) {
         QJsonArray bids = obj["bids"].toArray();
         QJsonArray asks = obj["asks"].toArray();
 
+        int levelCount = std::min(bids.size(), asks.size());
+
         orderBookModel->clear();
         orderBookModel->setHorizontalHeaderLabels({"BID Qty", "BID Price", "ASK Price", "ASK Qty"});
 
-        int count = std::max(bids.size(), asks.size());
-        for (int i = 0; i < count; ++i) {
-            QList<QStandardItem *> row;
-            if (i < bids.size()) {
-                QJsonArray bid = bids[i].toArray();
-                row << new QStandardItem(bid[1].toString());
-                row << new QStandardItem(bid[0].toString());
-            } else {
-                row << new QStandardItem("");
-                row << new QStandardItem("");
-            }
+        for (int i = 0; i < levelCount; ++i) {
+            QJsonArray bid = bids[i].toArray();
+            QJsonArray ask = asks[i].toArray();
 
-            if (i < asks.size()) {
-                QJsonArray ask = asks[i].toArray();
-                row << new QStandardItem(ask[0].toString());
-                row << new QStandardItem(ask[1].toString());
-            } else {
-                row << new QStandardItem("");
-                row << new QStandardItem("");
-            }
+            QList<QStandardItem *> row;
+            row << new QStandardItem(bid[1].toString());
+            row << new QStandardItem(bid[0].toString());
+            row << new QStandardItem(ask[0].toString());
+            row << new QStandardItem(ask[1].toString());
 
             orderBookModel->appendRow(row);
         }
+
     });
 }
 
